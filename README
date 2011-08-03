@@ -1,8 +1,10 @@
-Logsurfer 1.5a
-=============
+Logsurfer 1.5b
+==============
 
-This is version 1.5a of the logdaemon package.
-See "ChangeLog" file for an overview of changes
+In version 1.5b an off-by-one overflow in the heap and 
+an uninitialized pointer have been fixed (see ChangeLog).
+Credits to Miron Cuperman,  Gary L. Hennigan, Yonekawa Susumu,
+and Jonathan Heusser.
 
 General Comments:
 =================

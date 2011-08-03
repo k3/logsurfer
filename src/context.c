@@ -487,7 +487,7 @@ do_context_action(this_context)
 			return;
 		}
 		if ((dummy_action->this_word=(char *)
-			malloc(strlen(this_context->match_regex_str))) == NULL ) {
+			malloc(strlen(this_context->match_regex_str)+1)) == NULL ) {
 			(void) fprintf(stderr, "out of memory preparing pipe cmd\n");
 			return;
 		}

@@ -112,6 +112,7 @@ read_config(filename)
 		(void) fprintf(stderr, "memory problems reading configfile\n");
 		return(1);
 	}
+	buffer[0] = '\0';
 	/* dito for one complete configline */
 	cfline_size=1024;
 	if ( (cfline=(char *)malloc(cfline_size)) == NULL ) {

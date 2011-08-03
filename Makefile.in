@@ -1,10 +1,10 @@
-# Makefile for logsurfer 1.5a
+# Makefile for logsurfer 1.5b
 # 
-# Copyright (C) 1995-99 DFN-CERT
+# Copyright (C) 1995-2002 DFN-CERT
 #	written by W. Ley and U. Ellermann
 #
 
-version = 1.5a
+version = 1.5b
 
 # Where is the default configuration file
 #
