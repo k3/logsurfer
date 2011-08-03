@@ -1,3 +1,6 @@
+Version 1.6b (logsurfer+)
+	+ fixed -t option in getopts()
+
 Version 1.6a (logsurfer+)
 	Kerry Thompson kerry@crypt.gen.nz:
 	+ corrected off-by-one in min_lines checking
