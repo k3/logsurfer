@@ -1,5 +1,5 @@
 /*
- * logsurfer V 1.5b
+ * logsurfer V 1.6a
  *
  * (C) DFN-CERT, Germany
  * Authors: Wolfgang Ley, Uwe Ellermann
@@ -290,7 +290,7 @@ usage(progname)
 	(void) fprintf(stderr,
 		"usage: %s [-l startline | -r startregex] [-c configfile] [-d dumpfile] [-p pidfile] [-f] [logfile]\n",
 		progname);
-	(void) fprintf(stderr, "This is logsurfer+ version 1.6\n");
+	(void) fprintf(stderr, "This is logsurfer+ version 1.6a\n");
 	exit(1);
 }
 

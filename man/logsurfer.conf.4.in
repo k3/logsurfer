@@ -163,7 +163,7 @@ an ignore rule for certain actions) at the top.
 .LP
 \fIContexts\fP have the following format:
 .LP
-match_regex match_not_regex line_limit timeout_abs timeout_rel default_action
+match_regex match_not_regex line_limit timeout_abs timeout_rel [min_lines] default_action
 .LP
 .TP 20
 match_regex
@@ -197,6 +197,14 @@ timeout specifying the number of seconds since the last message was added to
 this context. This is a kind of inactive timer you can use to launch the
 default action if there are no new messages stored in this context for a
 certain amount of time.
+.TP
+min_lines
+An optional parameter specifying the minimum number of lines matched by a
+context before the action will be performed. The action will be performed
+if and only if it has collected min_lines or more log lines, otherwise the
+context will simply be deleted without any action. Note that min_lines does
+not in itself trigger the action - only a timeout or max_lines will do so.
+Default is 0 (no check for min_lines)
 .TP
 default_action
 This is the action that is processed if the linenumber limit or one of the

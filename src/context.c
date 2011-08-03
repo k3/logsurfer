@@ -541,7 +541,7 @@ check_context_timeout()
 		if ( (this_context->timeout_abs < (long) current_time) ||
 			(this_context->timeout_rel < (long) current_time) ) {
 
-		        if (!this_context->min_lines || this_context->lines > this_context->min_lines )
+		        if (!this_context->min_lines || this_context->lines >= this_context->min_lines )
 			  do_context_action(this_context);
 			unlink_context(this_context);
 		}
@@ -570,7 +570,7 @@ check_context_linelimit()
 	while ( this_context != NULL ) {
 		next_context=this_context->next;
 		if ( this_context->lines > this_context->max_lines ) {
-		        if (!this_context->min_lines || this_context->lines > this_context->min_lines )
+		        if (!this_context->min_lines || this_context->lines >= this_context->min_lines )
 			        do_context_action(this_context);
 			unlink_context(this_context);
 		}

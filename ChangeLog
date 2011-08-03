@@ -1,3 +1,8 @@
+Version 1.6a (logsurfer+)
+	Kerry Thompson kerry@crypt.gen.nz:
+	+ corrected off-by-one in min_lines checking
+	+ added min_lines context arg to logsurfer.conf man page
+
 Version 1.6 (logsurfer+)
 	Kerry Thompson kerry@crypt.gen.nz:
 	+ added an optional parameter at the end of context definition
