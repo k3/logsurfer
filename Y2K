@@ -1,0 +1,28 @@
+ Year 2000 compliance
+As far as the DFN-CERT is aware, the code constituting logsurfer should
+present no problems with respect to year 2000 compliance. Logsurfer's
+time and date functionality, i.e. the determination of time and date and
+the conversion of time and date between formats is based the underlying
+operating system's capabilities. The year 2000 compliance of the
+software is therefore dependent on the host operating system as well as
+the application's run-time environment.
+
+ Disclaimer of warranty
+Logsurfer is provided free of charge, and, therefore, on an "as is"
+basis, without warranty of any kind, including without limitation the
+warranties that it is free of defects, merchantable, fit for a
+particular purpose or non-infringing. The entire risk as to the quality
+and performance of logsurfer is borne by the user. Should logsurfer
+prove defective in any respect, the user and not DFN-CERT assumes the
+entire cost of of any service and repair. No use of logsurfer is
+authorized hereunder except under this disclaimer.
+
+ Limitation of liability
+To the maximum extent permitted by applicable law, in no event shall
+DFN-CERT be liable for any indirect, special, incidental or
+consequential damages arising out of the use of or inability to use
+logsurfer, including, without limitation, damages for loss of goodwill,
+work stoppage, computer failure or malfunction, or any and all other
+commercial damages or losses, even if advised of the possibility
+thereof, and regardless of the legal or equitable theory (contract, tort
+or otherwise) upon which the claim is based.

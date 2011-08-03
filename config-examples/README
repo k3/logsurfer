@@ -1,0 +1,6 @@
+The configuration examples are available as a seperate archive.
+
+This allows updates on the examples without repacking the complete
+logsurfer package.
+
+See ftp://ftp.cert.dfn.de/pub/tools/audit/logsurfer/config-examples/
