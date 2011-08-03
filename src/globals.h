@@ -48,6 +48,9 @@ extern char		dumpfile_name[MAXPATHLEN];       /* name of dumpfile */
 
 extern int		exit_silent;	/* exit silently?		*/
 
+extern int              timeout_contexts_at_exit;     /* timeout contexts when exit? */
+
+
 /*
  * definitions for the regular expression matching routines
  *

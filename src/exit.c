@@ -165,7 +165,7 @@ real_dump_data()
 	(void) fprintf(dumpfile, "* CONTEXT Information\n");
 	(void) fprintf(dumpfile, "*\n");
 	(void) fprintf(dumpfile, "*     match_regex match_not_regex\n");
-	(void) fprintf(dumpfile, "*           max_lines timeout_abs timeout_rel action\n");
+	(void) fprintf(dumpfile, "*           max_lines timeout_abs timeout_rel min_lines action\n");
 	(void) fprintf(dumpfile, "*           contents\n");
 	(void) fprintf(dumpfile, "*******************************************************\n\n");
 	for ( context_ptr=all_contexts; context_ptr!=NULL; context_ptr=context_ptr->next ) {
@@ -187,6 +187,7 @@ real_dump_data()
 			(void) fprintf(dumpfile, "0 ");
 		else
 			(void) fprintf(dumpfile, "%ld ", context_ptr->timeout_rel_offset);
+		(void) fprintf(dumpfile, "%ld ", context_ptr->min_lines);
 		switch (context_ptr->action_type) {
 		case ACTION_IGNORE:
 			(void) fprintf(dumpfile, "IGNORE");
@@ -319,7 +320,8 @@ logsurfer_exit(sig)
 		next_context=this_context->next;
 		if ( (this_context->timeout_abs != LONG_MAX) ||
 			(this_context->timeout_rel != LONG_MAX) ) {
-			do_context_action(this_context);
+		        if( timeout_contexts_at_exit )
+			  do_context_action(this_context);
 			unlink_context(this_context);
 		}
 		this_context=next_context;

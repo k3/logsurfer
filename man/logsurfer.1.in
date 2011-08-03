@@ -28,6 +28,8 @@ logsurfer \- process logfiles and perform certain actions
 ] [
 .B \-s
 ] [
+.B \-t
+] [
 .B filename
 ]
 .SH DESCRIPTION
@@ -152,6 +154,12 @@ expression.
 Normally the logsurfer prints some information to stderr if the
 program exists. If you specify the "-s" (silent) option, then those
 messages are not printed.
+.TP
+.B \-t
+When logsurfer exits, the -t option will instruct it to explicitly expire
+all contexts which have either a relative or absolute timeout configured.
+Without the -t option, contexts will not be timed-out and will be removed
+silently without triggering their actions.
 .SH "FILES"
 .PD 0
 .TP 32

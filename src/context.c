@@ -72,6 +72,7 @@ create_context()
 	new_context->match_not_regex_str=NULL;
 	new_context->match_not_regex=NULL;
 	new_context->max_lines=LONG_MAX;
+	new_context->min_lines=0;
 	new_context->timeout_abs=LONG_MAX;
 	new_context->timeout_rel=LONG_MAX;
 	new_context->timeout_rel_offset=0;
@@ -211,6 +212,14 @@ open_context(context_def)
 		new_context->timeout_rel+=(long) current_time;
 		if ( new_context->timeout_rel < next_context_timeout )
 			next_context_timeout=new_context->timeout_rel;
+	}
+
+	/* if the next field is numeric, then its an optional min_lines */
+	src=skip_spaces(src);
+	if( isdigit(*src) ){
+	  new_context->min_lines=atol(src);
+	  while ( (*src != '\0') && (!isspace(*src)) )
+	    src++;
 	}
 
 	/* the rest is the default action */
@@ -414,35 +423,39 @@ add_to_context(this_context, new_context_line)
 {
 	struct context_body	*new_context_body;
 
-	/*
-	 * init the new context body
-	 */
-	if ( (new_context_body=(struct context_body *)
+	if( this_context->action_type == ACTION_PIPE || this_context->action_type == ACTION_REPORT ){
+
+	  /*
+	   * init the new context body
+	   */
+	  if ( (new_context_body=(struct context_body *)
 		malloc(sizeof(struct context_body))) == NULL ) {
 		(void) fprintf(stderr, "out of memory updating context\n");
 		(void) fprintf(stderr, "dropping line: %s\n", new_context_line->content);
 		return;
-	}
-	new_context_body->this_line=new_context_line;
-	new_context_body->next=NULL;
+	  }
+	  new_context_body->this_line=new_context_line;
+	  new_context_body->next=NULL;
 
-	/*
-	 * link it into the context
-	 */
-	if ( this_context->last == NULL ) {
+	  /*
+	   * link it into the context
+	   */
+	  if ( this_context->last == NULL ) {
 		this_context->body=new_context_body;
 		this_context->last=new_context_body;
-	}
-	else {
+	  }
+	  else {
 		this_context->last->next=new_context_body;
 		this_context->last=new_context_body;
+	  }
+
+	  /*
+	   * increment the linkt counter
+	   */
+	  new_context_line->link_counter++;
+
 	}
 	this_context->lines++;
-
-	/*
-	 * increment the linkt counter
-	 */
-	new_context_line->link_counter++;
 
 	/*
 	 * adjust a relative timeout (if used)
@@ -527,7 +540,9 @@ check_context_timeout()
 		next_context=this_context->next;
 		if ( (this_context->timeout_abs < (long) current_time) ||
 			(this_context->timeout_rel < (long) current_time) ) {
-			do_context_action(this_context);
+
+		        if (!this_context->min_lines || this_context->lines > this_context->min_lines )
+			  do_context_action(this_context);
 			unlink_context(this_context);
 		}
 		else {
@@ -555,7 +570,8 @@ check_context_linelimit()
 	while ( this_context != NULL ) {
 		next_context=this_context->next;
 		if ( this_context->lines > this_context->max_lines ) {
-			do_context_action(this_context);
+		        if (!this_context->min_lines || this_context->lines > this_context->min_lines )
+			        do_context_action(this_context);
 			unlink_context(this_context);
 		}
 		this_context=next_context;

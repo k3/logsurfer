@@ -1,3 +1,17 @@
+Version 1.6 (logsurfer+)
+	Kerry Thompson kerry@crypt.gen.nz:
+	+ added an optional parameter at the end of context definition
+	  (just before action) specifying the minimum number of lines
+	  collected which needs to be satisfied before performing action
+	+ added -t option to explicity timeout contexts when exiting
+	  default=off so contexts don't all trigger when we shut down
+	+ only add lines to a context if the context has an action of
+	  'pipe' or 'report'. In other words, don't store lines in
+	  memory which won't ever be used. The number of matching
+	  lines in the context is still incremented. This allows contexts
+	  to be created which can notify if we _don't_ see an event, such
+	  as regular "syslog pings" from hosts.
+	
 Version 1.5b
 	+ Corrected off-by-one heap overflow and uninitialized pointer
 

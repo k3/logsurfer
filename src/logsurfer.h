@@ -71,6 +71,7 @@ struct context {
 	struct re_pattern_buffer *match_not_regex;
 	char			*match_not_regex_str;
 	long			max_lines;	/* maximum number of bodylines	*/
+	long			min_lines;	/* minimum number of bodylines	*/
 	long			timeout_abs;	/* absolut timeout		*/
 	long			timeout_rel;	/* relativ timeout		*/
 	long			timeout_rel_offset;	/* from the config line	*/

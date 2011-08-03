@@ -116,6 +116,8 @@ char		dumpfile_name[MAXPATHLEN];	/* name of the dumpfile */
 
 int		exit_silent=0;		/* exit silently?	*/
 
+int             timeout_contexts_at_exit=0;     /* timeout contexts when exit? */
+
 /*
  * definitions for the regular expression matching routines
  *
@@ -288,7 +290,7 @@ usage(progname)
 	(void) fprintf(stderr,
 		"usage: %s [-l startline | -r startregex] [-c configfile] [-d dumpfile] [-p pidfile] [-f] [logfile]\n",
 		progname);
-	(void) fprintf(stderr, "This is logsurfer version 1.5b\n");
+	(void) fprintf(stderr, "This is logsurfer+ version 1.6\n");
 	exit(1);
 }
 
@@ -446,6 +448,9 @@ main(argc, argv)
 			break;
 		case 's':
 			exit_silent=1;
+			break;
+		case 't':
+		        timeout_contexts_at_exit=1;
 			break;
 		default:
 			usage(progname);
