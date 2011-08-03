@@ -49,6 +49,8 @@ char *strchr();
 #include <malloc.h>
 #endif
 
+#include <syslog.h>
+
 
 /* local includes */
 
@@ -290,5 +292,178 @@ flush_queue()
 }
 
 #endif	/* SENDMAIL_FLUSH */
+
+
+/*
+ * echo the tokens to stdout
+ */
+void
+do_echo(echo_tokens)
+	struct action_tokens	*echo_tokens;
+{
+	char	*echostring;
+	char *outfile_name;
+	FILE *outfile;
+	char *write_mode;
+
+	if ((echostring=echo_tokens->this_word) == NULL ) {
+		(void) fprintf(stderr, "echo definition without argument\n");
+		return;
+	}
+	if( echostring[0] == '>' ){
+	  /* we've got a filename : grab it, open it, and hop to the next string */
+	  outfile_name = echostring+1;
+	  if( outfile_name[0] == '>' ){
+	    outfile_name++;
+	    write_mode = "a"; /* append */
+	  } else {
+	    write_mode = "w";
+	  }
+	  if (echo_tokens->next == NULL || (echostring=(echo_tokens->next)->this_word) == NULL ) {
+	    (void) fprintf(stderr, "echo definition without argument\n");
+	    return;
+	  }
+	  outfile = fopen( outfile_name, write_mode );
+	  if( outfile == NULL ){
+	    (void) fprintf(stderr, "failed to open echo output file %s\n", outfile_name );
+	    return;
+	  }
+	  fprintf(outfile,"%s\n",echostring);
+	  fclose(outfile);
+	} else {
+	  /* normal stdout output */
+	  fprintf(stdout,"%s\n",echostring);
+	  fflush(stdout);
+	}
+
+	return;
+}
+
+void
+do_syslog(syslog_tokens)
+struct action_tokens    *syslog_tokens;
+{
+	char *fac_level_str;
+	char *log_str;
+	int syslog_facility, syslog_level;
+
+	fac_level_str = syslog_tokens->this_word;
+	if(syslog_tokens->next == NULL || (log_str=(syslog_tokens->next)->this_word) == NULL ){
+		(void) fprintf(stderr, "syslog command without enough arguments");
+		return;
+	}
+
+	/* parse facility & level */
+	if( !parse_syslog_faclevel( fac_level_str, &syslog_facility, &syslog_level ) ){
+		(void) fprintf(stderr, "unknown syslog facility/level argument");
+		return;
+	}
+
+	/* open syslog */
+	openlog( "logsurfer", LOG_NDELAY|LOG_PID, syslog_facility );
+	syslog( syslog_level, "%s", log_str=(syslog_tokens->next)->this_word );
+	closelog();
+}
+
+/*
+  Parse syslog facility:level parameter string
+  returns 0-failed, 1-success
+*/
+int parse_syslog_faclevel( faclevel, facility, level )
+char *faclevel;
+int *facility, *level;
+{
+	char *levelstr;
+
+	if( (levelstr = strchr(faclevel,':')) == NULL){
+		(void) fprintf(stderr, "no colon in facility:level argument" );  /*debug*/
+		return 0;
+	}
+	levelstr++;
+
+	if( !strncmp(faclevel,"kern",4) )
+		*facility = LOG_KERN;
+#ifdef LOG_AUTHPRIV
+	else if( !strncmp(faclevel,"authpriv",8) )
+		*facility = LOG_AUTHPRIV;
+#endif
+#ifdef LOG_CRON
+	else if( !strncmp(faclevel,"cron",4) )
+		*facility = LOG_CRON;
+#endif
+	else if( !strncmp(faclevel,"daemon",6) )
+		*facility = LOG_DAEMON;
+#ifdef LOG_FTP
+	else if( !strncmp(faclevel,"ftp",3) )
+		*facility = LOG_FTP;
+#endif
+#ifdef LOG_AUTH
+	else if( !strncmp(faclevel,"auth",4) )
+		*facility = LOG_AUTH;
+#endif
+	else if( !strncmp(faclevel,"local0",6) )
+		*facility = LOG_LOCAL0;
+	else if( !strncmp(faclevel,"local1",6) )
+		*facility = LOG_LOCAL1;
+	else if( !strncmp(faclevel,"local2",6) )
+		*facility = LOG_LOCAL2;
+	else if( !strncmp(faclevel,"local3",6) )
+		*facility = LOG_LOCAL3;
+	else if( !strncmp(faclevel,"local4",6) )
+		*facility = LOG_LOCAL4;
+	else if( !strncmp(faclevel,"local5",6) )
+		*facility = LOG_LOCAL5;
+	else if( !strncmp(faclevel,"local6",6) )
+		*facility = LOG_LOCAL6;
+	else if( !strncmp(faclevel,"local7",6) )
+		*facility = LOG_LOCAL7;
+	else if( !strncmp(faclevel,"lpr",3) )
+		*facility = LOG_LPR;
+	else if( !strncmp(faclevel,"mail",4) )
+		*facility = LOG_MAIL;
+#ifdef LOG_NEWS
+	else if( !strncmp(faclevel,"news",4) )
+		*facility = LOG_NEWS;
+#endif
+	else if( !strncmp(faclevel,"syslog",6) )
+		*facility = LOG_SYSLOG;
+	else if( !strncmp(faclevel,"user",4) )
+		*facility = LOG_USER;
+#ifdef LOG_UUCP
+	else if( !strncmp(faclevel,"uucp",4) )
+		*facility = LOG_UUCP;
+#endif
+	else {
+		/* facility unknown */
+		(void) fprintf(stderr, "unknown facility" );  /*debug*/
+		return 0;
+	}
+
+	if( !strncmp(levelstr,"emerg",5) )
+		*level = LOG_EMERG;
+	else if( !strncmp(levelstr,"alert",5) )
+		*level = LOG_ALERT;
+	else if( !strncmp(levelstr,"crit",4) )
+		*level = LOG_CRIT;
+	else if( !strncmp(levelstr,"err",3) )
+		*level = LOG_ERR;
+	else if( !strncmp(levelstr,"warn",4) )
+		*level = LOG_WARNING;
+	else if( !strncmp(levelstr,"notice",6) )
+		*level = LOG_NOTICE;
+	else if( !strncmp(levelstr,"info",4) )
+		*level = LOG_INFO;
+	else if( !strncmp(levelstr,"debug",5) )
+		*level = LOG_DEBUG;
+	else {
+		/* level unknown */
+		(void) fprintf(stderr, "unknown level" );  /*debug*/
+		return 0;
+	}
+
+	return 1;
+}
+
+
 
 

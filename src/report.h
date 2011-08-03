@@ -6,7 +6,7 @@
 
 #if __STDC__
 
-void	make_report(struct action_tokens *);
+void	make_report(struct action_tokens *, struct context_body *);
 void	add_to_report(struct context_body *, struct context_body *);
 
 #else /* __STDC__ */

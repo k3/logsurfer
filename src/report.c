@@ -76,8 +76,9 @@ char *strchr();
  * external command
  */
 void
-make_report(action_body)
+make_report(action_body, ref_context_body)
 	struct action_tokens	*action_body;
+	struct context_body	*ref_context_body;
 {
 	char			*cmdstring;
 	struct context		*next_context;
@@ -109,7 +110,9 @@ make_report(action_body)
 #ifdef DEBUG
 (void) printf("searching for context: ***%s***\n", this_word->this_word);
 #endif
-		if ( (next_context=find_context(this_word->this_word)) != NULL )
+		if ( !strcmp(this_word->this_word,"-") && ref_context_body != NULL )
+			add_to_report(&report_body, ref_context_body);
+		else if ( (next_context=find_context(this_word->this_word)) != NULL )
 			add_to_report(&report_body, next_context->body);
 		this_word=this_word->next;
 	}

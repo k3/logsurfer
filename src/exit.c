@@ -113,19 +113,19 @@ real_dump_data()
 	(void) fprintf(dumpfile, "*******************************************************\n\n");
 	for (rule_ptr=all_rules; rule_ptr != NULL; rule_ptr=rule_ptr->next) {
 		(void) fprintf(dumpfile, "-----\n");
-		(void) fprintf(dumpfile, "%s ", rule_ptr->match_regex_str);
+		(void) fprintf(dumpfile, "\"%s\" ", rule_ptr->match_regex_str);
 		if ( rule_ptr->match_not_regex_str == NULL )
 			(void) fprintf(dumpfile, "-\n");
 		else
-			(void) fprintf(dumpfile, "%s\n", rule_ptr->match_not_regex_str);
+			(void) fprintf(dumpfile, "\"%s\"\n", rule_ptr->match_not_regex_str);
 		if ( rule_ptr->stop_regex_str == NULL )
 			(void) fprintf(dumpfile, "\t- ");
 		else
-			(void) fprintf(dumpfile, "\t%s ", rule_ptr->stop_regex_str);
+			(void) fprintf(dumpfile, "\t\"%s\" ", rule_ptr->stop_regex_str);
 		if ( rule_ptr->stop_not_regex_str == NULL )
 			(void) fprintf(dumpfile, "- ");
 		else
-			(void) fprintf(dumpfile, "%s ", rule_ptr->stop_not_regex_str);
+			(void) fprintf(dumpfile, "\"%s\" ", rule_ptr->stop_not_regex_str);
 		if ( rule_ptr->timeout == LONG_MAX )
 			(void) fprintf(dumpfile, "0");
 		else
@@ -155,6 +155,12 @@ real_dump_data()
 		case ACTION_RULE:
 			(void) fprintf(dumpfile, "RULE %s\n", rule_ptr->action_body);
 			break;
+		case ACTION_ECHO:
+			(void) fprintf(dumpfile, "ECHO %s\n", rule_ptr->action_body);
+			break;
+		case ACTION_SYSLOG:
+			(void) fprintf(dumpfile, "SYSLOG %s\n", rule_ptr->action_body);
+			break;
 		default:
 			(void) fprintf(dumpfile, "(UNKNOWN) - shouldn't happen\n");
 		}
@@ -170,11 +176,11 @@ real_dump_data()
 	(void) fprintf(dumpfile, "*******************************************************\n\n");
 	for ( context_ptr=all_contexts; context_ptr!=NULL; context_ptr=context_ptr->next ) {
 		(void) fprintf(dumpfile, "-----\n");
-		(void) fprintf(dumpfile, "%s ", context_ptr->match_regex_str);
+		(void) fprintf(dumpfile, "\"%s\" ", context_ptr->match_regex_str);
 		if ( context_ptr->match_not_regex_str == NULL )
 			(void) fprintf(dumpfile, "-\n");
 		else
-			(void) fprintf(dumpfile, "%s\n", context_ptr->match_not_regex_str);
+			(void) fprintf(dumpfile, "\"%s\"\n", context_ptr->match_not_regex_str);
 		if ( context_ptr->max_lines == LONG_MAX )
 			(void) fprintf(dumpfile, "\t0 ");
 		else
@@ -200,6 +206,12 @@ real_dump_data()
 			break;
 		case ACTION_REPORT:
 			(void) fprintf(dumpfile, "REPORT");
+			break;
+		case ACTION_ECHO:
+			(void) fprintf(dumpfile, "ECHO");
+			break;
+		case ACTION_SYSLOG:
+			(void) fprintf(dumpfile, "SYSLOG");
 			break;
 		default:
 			(void) fprintf(dumpfile, "(UNKNOWN) - shouldn't happen");

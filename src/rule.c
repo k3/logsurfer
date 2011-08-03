@@ -426,6 +426,38 @@ parse_rule(input_line)
 		}
 		(void) strcpy(new_rule->action_body, help_ptr);
 	}
+	else if (!strncasecmp(help_ptr, "echo", 4)) {
+		new_rule->action_type=ACTION_ECHO;
+		help_ptr=skip_spaces(help_ptr+4);
+		if ( *help_ptr == '\0' ) {
+			(void) fprintf(stderr, "echo without string in rule: %s\n",
+				input_line);
+			destroy_rule(new_rule);
+			return(NULL);
+		}
+		if ( (new_rule->action_body=(char *)malloc(strlen(help_ptr)+1)) == NULL ) {
+			(void) fprintf(stderr, "out of memory parsing rule\n");
+			destroy_rule(new_rule);
+			return(NULL);
+		}
+		(void) strcpy(new_rule->action_body, help_ptr);
+	}
+	else if (!strncasecmp(help_ptr, "syslog", 6)) {
+		new_rule->action_type=ACTION_SYSLOG;
+		help_ptr=skip_spaces(help_ptr+6);
+		if ( *help_ptr == '\0' ) {
+			(void) fprintf(stderr, "syslog without arguments in rule: %s\n",
+				input_line);
+			destroy_rule(new_rule);
+			return(NULL);
+		}
+		if ( (new_rule->action_body=(char *)malloc(strlen(help_ptr)+1)) == NULL ) {
+			(void) fprintf(stderr, "out of memory parsing rule\n");
+			destroy_rule(new_rule);
+			return(NULL);
+		}
+		(void) strcpy(new_rule->action_body, help_ptr);
+	}
 	else {
 		(void) fprintf(stderr, "unknown action in rule: %s\n", input_line);
 		destroy_rule(new_rule);
@@ -567,11 +599,29 @@ process_rule(this_rule)
 				this_rule->action_body);
 			return;
 		}
-		make_report(help_ptr);
+		make_report(help_ptr,NULL);
 		free_tokens(help_ptr);
 		break;
 	case ACTION_RULE:
 		dynamic_add_rule(this_rule);
+		break;
+	case ACTION_ECHO:
+		if ((help_ptr=collect_tokens(this_rule->action_body)) == NULL) {
+			(void) fprintf(stderr, "out of memory generating echo: %s\n",
+				this_rule->action_body);
+			return;
+		}
+		do_echo(help_ptr);
+		free_tokens(help_ptr);
+		break;
+	case ACTION_SYSLOG:
+		if ((help_ptr=collect_tokens(this_rule->action_body)) == NULL) {
+			(void) fprintf(stderr, "out of memory generating syslog: %s\n",
+				this_rule->action_body);
+			return;
+		}
+		do_syslog(help_ptr);
+		free_tokens(help_ptr);
 		break;
 	}
 	return;

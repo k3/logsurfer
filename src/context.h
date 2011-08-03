@@ -23,6 +23,8 @@ void		do_context_action(struct context *);
 
 void		check_context_timeout();
 
+void		expand_context_action_macros(struct context *);
+
 #else /* __STDC__ */
 
 struct context	*create_context();
@@ -41,5 +43,7 @@ void		do_context_action();
 
 void		check_context_timeout();
 void		check_context_linelimit();
+
+void		expand_context_action_macros();
 
 #endif /* __STDC__ */

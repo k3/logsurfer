@@ -257,6 +257,26 @@ open_context(context_def)
 			return;
 		}
 	}
+	else if ( !strncasecmp(src, "echo", 4) ) {
+	        new_context->action_type=ACTION_ECHO;
+		src=skip_spaces(src+4);
+		if ( (new_context->action_tokens=collect_tokens(src)) == NULL ) {
+			(void) fprintf(stderr, "out of memory creating context: %s\n",
+				context_def);
+			destroy_context(new_context);
+			return;
+		}
+	}
+	else if ( !strncasecmp(src, "syslog", 6) ) {
+	        new_context->action_type=ACTION_SYSLOG;
+		src=skip_spaces(src+6);
+		if ( (new_context->action_tokens=collect_tokens(src)) == NULL ) {
+			(void) fprintf(stderr, "out of memory creating context: %s\n",
+				context_def);
+			destroy_context(new_context);
+			return;
+		}
+	}
 	else {
 		(void) fprintf(stderr, "unknown default action: %s\n", src);
 		destroy_context(new_context);
@@ -483,6 +503,7 @@ do_context_action(this_context)
 	case ACTION_IGNORE:
 		break;
 	case ACTION_EXEC:
+		expand_context_action_macros( this_context );
 		do_exec(this_context->action_tokens);
 		break;
 	case ACTION_PIPE:
@@ -507,13 +528,23 @@ do_context_action(this_context)
 		(void) strcpy(dummy_action->this_word, this_context->match_regex_str);
 		dummy_action->next=NULL;
 		this_context->action_tokens->next=dummy_action;
-		make_report(this_context->action_tokens);
+		expand_context_action_macros( this_context );
+		make_report(this_context->action_tokens, this_context->body);
 		this_context->action_tokens->next=NULL;
 		(void) free(dummy_action->this_word);
 		(void) free(dummy_action);
 		break;
 	case ACTION_REPORT:
-		make_report(this_context->action_tokens);
+		expand_context_action_macros( this_context );
+		make_report(this_context->action_tokens, this_context->body);
+		break;
+	case ACTION_ECHO:
+		expand_context_action_macros( this_context );
+		do_echo(this_context->action_tokens);
+		break;
+	case ACTION_SYSLOG:
+		expand_context_action_macros( this_context );
+		do_syslog(this_context->action_tokens);
 		break;
 	default:
 		(void) fprintf(stderr,
@@ -577,6 +608,63 @@ check_context_linelimit()
 		this_context=next_context;
 	}
 	return;
+}
+
+
+/*
+ * expand any macro functions in a string:
+ *   $lines -> replaced with count of lines in a context
+ */
+#define TEMPSTR_SZ 2048
+void expand_context_action_macros( this_context )
+struct context  *this_context;{
+	char *pos;
+	int cpos;
+	char tempstr[TEMPSTR_SZ], *tp;
+	char *new_string;
+	char **cmd_string;
+	struct action_tokens *act_token;
+	int replacements = 0;
+
+	/*
+	 * Loop through all action tokens in the context
+	 */
+	for( act_token=this_context->action_tokens ; act_token != NULL ; act_token=act_token->next ){
+	  cmd_string = &act_token->this_word;
+	  for( pos=*cmd_string, tp=tempstr ; *pos ; pos++ ){
+	    if( *pos == '$' && ( pos == *cmd_string || *(pos-1) != '\\' ) ){
+              if( !strncmp(pos+1,"lines",5) ){
+                tp += sprintf(tp,"%d",this_context->lines);
+		pos += 5;
+		replacements++;
+              } else {
+		*tp++ = *pos;
+	      }
+            } else {
+                *tp++ = *pos;
+            }
+	    /* Avoid stack overflow in temp_str */
+	    if( tp > (tempstr + TEMPSTR_SZ - 16) ){
+	      fprintf(stderr,"action string too long in expand_context_action_macros");
+	      return;
+	    }
+          }
+	  *tp = '\0';
+		  
+	  if( replacements ){
+	    /*
+	     * malloc space for the new string, and replace the old on in the action list
+	     */
+	    if( (new_string = (char *)malloc(strlen(tempstr)+1)) == NULL){
+	      (void) fprintf(stderr,"malloc failed in expand_context_action_macros\n");
+	      return;
+	    }
+	    strcpy(new_string,tempstr);
+	    free( *cmd_string );
+	    *cmd_string = new_string;
+	  }
+	}
+
 }
 
 

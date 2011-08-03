@@ -137,6 +137,23 @@ inserted before the current rule), "behind" (the new rule is inserted behind
 the current rule), "top" (insert at the top of all rules) or "bottom"
 (append at the end of all existing rules). Any following keywords
 should again be in the format of the rule definition.
+.TP
+echo
+The echo action simply echos the next argument string to stdout. This
+is useful if you want to output a simple string without invoking a
+separate process to do so. If the first argument is ">file", or
+">>file" then the second argument is written to the specified file,
+either overwriting or appending the file respectively.
+.TP
+syslog
+This allows you to send messages into syslog. The first keyword
+following the syslog action is the syslog facility and level in the
+format (facility):(level) where facility must be one of auth,
+authpriv, cron, daemon, ftp, kern, local0, local1, local2, local3,
+local4, local5, local6, local7, lpr, mail, news, syslog, user, uucp
+and level must be one of emerg, alert, crit, err, warn, notice, info,
+debug. The second argument to the syslog action is a string to send
+to syslog, which should be surrounded by quotes.
 .LP
 Once a logline has matched a rule this rule perform certain actions.
 Rules form the "active" part of the logsurfer.
@@ -220,7 +237,9 @@ if an external program hangs or takes a long time to finish.
 .LP
 If you need to specify a context (for example in the "open", "delete"
 and "report" actions) you have to do this by giving the exact regular
-expression that this context uses for matching (match_regex).
+expression that this context uses for matching (match_regex), alternatively
+if you specify "-" as the context, then logsurfer will apply the contents of
+the context under which the action is being performed.
 .LP
 The timeout functions require timestamps for each message that is processed.
 To be independent of the message format the logsurfer uses the time when

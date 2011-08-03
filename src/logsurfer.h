@@ -46,6 +46,8 @@
 #define ACTION_DELETE	5
 #define ACTION_REPORT	6
 #define ACTION_RULE	7
+#define ACTION_ECHO     8
+#define ACTION_SYSLOG   9
 
 
 struct context_line {

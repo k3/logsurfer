@@ -1,3 +1,19 @@
+Version 1.7 (logsurfer+)
+	+ added -e option to begin processing from the current end
+	  of the input log file ( normally used with -f )
+	+ put double-quotes around regex expressions in dump file
+	+ if the context argument to a pipe or report action is "-"
+	  then the current context contents are piped into the command
+	  this should shorten most context definitions
+        + added new action "echo" which simply echo's the output on
+          stdout, or to a file with optional >file & >>file 1st arg
+	+ added a macro construct in context action fields, if "$lines"
+	  exists in a context action (such as a command line) it will
+	  be substituted by the number of lines in the context
+	+ added syslog action to send a message into syslog
+	  the first argument must be facility:level, the second arg
+	  is a string to send to syslog
+
 Version 1.6b (logsurfer+)
 	+ fixed -t option in getopts()
 

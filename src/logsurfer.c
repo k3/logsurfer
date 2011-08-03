@@ -1,5 +1,5 @@
 /*
- * logsurfer V 1.6b
+ * logsurfer V 1.7
  *
  * (C) DFN-CERT, Germany
  * Authors: Wolfgang Ley, Uwe Ellermann
@@ -288,9 +288,9 @@ usage(progname)
 	char	*progname;
 {
 	(void) fprintf(stderr,
-		"usage: %s [-l startline | -r startregex] [-c configfile] [-d dumpfile] [-p pidfile] [-f] [-t] [logfile]\n",
+		"usage: %s [-l startline | -r startregex] [-c configfile] [-d dumpfile] [-p pidfile] [-f] [-t] [-e] [logfile]\n",
 		progname);
-	(void) fprintf(stderr, "This is logsurfer+ version 1.6b\n");
+	(void) fprintf(stderr, "This is logsurfer+ version 1.7\n");
 	exit(1);
 }
 
@@ -310,6 +310,7 @@ main(argc, argv)
 
 	char		cf_filename[MAXPATHLEN]; /* configuration filename */
 	long		start_line=0;		/* startline within logfile */
+	int             start_at_end=0;         /* start at end of file     */
 	struct re_pattern_buffer *start_regex=NULL; /* regex for startline  */
 	int		do_follow=0;		/* follow the file?	*/
 	FILE		*pidfile;		/* write pid info to file */
@@ -391,8 +392,12 @@ main(argc, argv)
 		exit(99);
 	}
 
-	while ( (opt = getopt(argc, argv, "fc:d:l:p:r:st")) != EOF )
+	while ( (opt = getopt(argc, argv, "efc:d:l:p:r:st")) != EOF )
 		switch(opt) {
+                case 'e':
+		        /* start processing at the end of the log file */
+		        start_at_end=1;
+		        break;
 		case 'f':
 			/* set follow mode on */
 			do_follow=1;
@@ -475,6 +480,9 @@ main(argc, argv)
 			(void) fprintf(stderr, "error opening logfile %s\n",
 				logfile_name);
 			exit(6);
+		}
+		if (start_at_end) {
+		  fseek(logfile,0,SEEK_END);
 		}
 	}
 

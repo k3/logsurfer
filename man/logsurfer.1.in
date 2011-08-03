@@ -30,6 +30,8 @@ logsurfer \- process logfiles and perform certain actions
 ] [
 .B \-t
 ] [
+.B \-e
+] [
 .B filename
 ]
 .SH DESCRIPTION
@@ -160,6 +162,11 @@ When logsurfer exits, the -t option will instruct it to explicitly expire
 all contexts which have either a relative or absolute timeout configured.
 Without the -t option, contexts will not be timed-out and will be removed
 silently without triggering their actions.
+.TP
+.B \-e
+When Logsurfer starts reading the log file this option will instruct it to
+seek to the end of the file before scanning starts. Without this option,
+Logsurfer will start scanning at the beginning of the file.
 .SH "FILES"
 .PD 0
 .TP 32
