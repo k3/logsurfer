@@ -87,11 +87,15 @@ prepare_exec(cmdstring)
 	while ( (new_argc < 255) && ((new_argv[new_argc++]=get_word(&src)) != NULL) )
 		;
 	regex_submatches_num=old_matchnum;
-	if ( (new_argc == 255) || (*(skip_spaces(src)) != '\0') )
+	if ( (new_argc == 255) || (*(skip_spaces(src)) != '\0') ){
+        new_argc--;
 		return(0);
-	if ( (new_argv[new_argc]=(char *)malloc(sizeof(char))) == NULL )
-		return(0);
-	*new_argv[new_argc]='\0';
+    }
+    if ( (new_argv[new_argc]=(char *)malloc(sizeof(char))) == NULL ){
+        new_argc--;
+        return(0);
+    }
+    *new_argv[new_argc]='\0';
 	return(1);
 }
 

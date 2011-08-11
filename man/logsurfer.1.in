@@ -1,11 +1,5 @@
 .\"
-.\" Copyright (c) DFN-CERT 1995-1999
-.\" written by W. Ley and U. Ellermann
-.\"
-.\" DFN-CERT
-.\" Vogt-Koelln-Strasse 30
-.\" 22527 Hamburg
-.\" Germany
+.\" written by W. Ley, U. Ellermann, and K. Thompson
 .\"
 .\" @(#) $Header: logsurfer.1,v 
 .TH LOGSURFER 1  "Thu Oct 19 1995"

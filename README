@@ -1,10 +1,14 @@
-Logsurfer 1.5b
-==============
+Logsurfer
+=========
 
-In version 1.5b an off-by-one overflow in the heap and 
-an uninitialized pointer have been fixed (see ChangeLog).
-Credits to Miron Cuperman,  Gary L. Hennigan, Yonekawa Susumu,
-and Jonathan Heusser.
+This is Logsurfer - the real-time log monitoring and alerting tool.
+
+Many enhancing features have been added to this version of Logsurfer,
+refer to the ChangeLog file for details.
+
+Refer to Logsurfer page at:
+	  http://www.crypt.gen.nz/logsurfer
+
 
 General Comments:
 =================
@@ -111,6 +115,9 @@ Any changes to the configuration file will only take effect AFTER
 logsurfer has been stopped and restarted. More information can be
 found in the man pages.
 
+A number of configuration examples can also be found at
+  	http://www.crypt.gen.nz/logsurfer/#configs
+
 Tools:
 ======
 
@@ -145,14 +152,16 @@ Thanks to
   the configure script
 - David Kibilka (d.kibilka@fz-juelich.de) for testing the context
   linelimit patch
-
+- Gregor Kopf of Recurity Labs GmbH and Jan Kohlrausch of DFN-CERT for
+  highlighting a double free() bug
+- Mike Santos for patches to implement -D and -F
 
 Feedback:
 =========
 
 Please let us know if and what kind of problems occur when using the
 logsurfer package. It will help us fix the problems and help others
-avoid replicating them. Please send all feedback to:
+avoid replicating them. Please send all bug reports and feedback to:
 
-	info@cert.dfn.de
+	logsurfer@crypt.gen.nz
 

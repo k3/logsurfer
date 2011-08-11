@@ -1,4 +1,12 @@
+Version 1.7a (logsurfer+)
+	Kerry Thompson kerry@crypt.gen.nz:
+	+ fixed double free() in exec.c/prepare_exec(), thanks to reports
+	  from Gregor Kopf of Recurity Labs and Jan Kohlrausch of DFN_CERT
+	+ centralised version number in Makefile.in
+	+ updated README for Logsurfer+
+
 Version 1.7 (logsurfer+)
+	Kerry Thompson kerry@crypt.gen.nz:
 	+ added -e option to begin processing from the current end
 	  of the input log file ( normally used with -f )
 	+ put double-quotes around regex expressions in dump file

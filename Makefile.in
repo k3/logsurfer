@@ -1,10 +1,10 @@
-# Makefile for logsurfer 1.5b
+# Makefile for logsurfer
 # 
-# Copyright (C) 1995-2002 DFN-CERT
-#	written by W. Ley and U. Ellermann
+#	original written by W. Ley and U. Ellermann
+#	updated by K. Thompson
 #
 
-version = 1.5b
+version = 1.8
 
 # Where is the default configuration file
 #
@@ -22,7 +22,7 @@ DEF_DUMPFILE = /dev/null
 #    to use the ugly sendmail hack (see README)
 #   -DWARN_ROOT
 #    print a warning if the program is started as root (see README)
-CPPFLAGS = -DWARN_ROOT
+CPPFLAGS = -DVERSION=\"$(version)\" -DWARN_ROOT
 
 # Which C-Compiler?
 CC = @CC@
