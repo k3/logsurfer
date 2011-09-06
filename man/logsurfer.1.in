@@ -12,7 +12,11 @@ logsurfer \- process logfiles and perform certain actions
 ] [
 .B \-d dumpfile
 ] [
+.B \-D
+] [
 .B \-f
+] [
+.B \-F
 ] [
 .B \-l start_linenum
 ] [
@@ -124,6 +128,11 @@ information about rules and contexts to this file if the program exists or a
 special signal was sent to the process (see NOTES). The default is
 "@DUMPFILE@".
 .TP
+.B \-D
+Daemonize. Fork and run the logsurfer process in the background.
+Any output sent to stdin, stdout and stderr are redirected to the
+bitbucket.
+.TP
 .B \-f
 Normally the logsurfer will process the input once and exit at the end
 (after processing all the input lines). By using the "-f" option the
@@ -133,6 +142,10 @@ to read a new line. If a new line has been added to the end of the input,
 then this line is processed. Otherwise the program will sleep again for
 one second. This mode is similar to the "-f" option of the tail(1)
 command.
+.TP
+.B \-F
+Acts like the "-f" option, but follows the logfile across rotations by
+checking if the inode of the file has changed and re-opening the log.
 .TP
 .B \-l start_linenum
 Start logfile processing at the given linenumber.

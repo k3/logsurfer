@@ -46,6 +46,7 @@ char *strchr();
 
 #include <signal.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #if TIME_WITH_SYS_TIME
 #include <sys/time.h>
@@ -74,6 +75,9 @@ char *strchr();
 #include <malloc.h>
 #endif
 
+#include <sys/errno.h>
+int errno;
+#include <fcntl.h>
 
 /* local includes */
 
@@ -112,10 +116,14 @@ struct context_line *logline_context;/* the context_line ptr	*/
 time_t		current_time;	/* current time information	*/
 
 char		dumpfile_name[MAXPATHLEN];	/* name of the dumpfile */
+char		pidfile_name[MAXPATHLEN];	/* name of the pid file */
 
 int		exit_silent=0;		/* exit silently?	*/
 
 int             timeout_contexts_at_exit=0;     /* timeout contexts when exit? */
+
+struct stat ostb;    /* Logfile attributes, used for -F option */
+struct stat nstb;    /* Logfile attributes, used for -F option */
 
 /*
  * definitions for the regular expression matching routines
@@ -278,6 +286,66 @@ logfile_reopen(sig)
 	return;
 }
 
+/*
+ * Fork and run in the background
+ */
+int
+runasdaemon(lfd)
+    int lfd;
+{
+    int fd = -1;
+    int maxfd = -1;
+
+    errno = 0;
+
+    switch (fork()) {
+        case -1:
+            (void) fprintf(stderr, "could not daemonize: fork(): %s\n", strerror(errno));
+            exit(11);
+        case 0:
+            break;
+        default:
+            exit(0);
+    }
+
+    if ( setsid() < 0 ) {
+        (void) fprintf(stderr, "could not daemonize: setsid(): %s\n", strerror(errno));
+        exit(6);
+    }
+
+    switch (fork()) {
+        case -1:
+            (void) fprintf(stderr, "could not daemonize: fork(): %s\n", strerror(errno));
+            exit(11);
+        case 0:
+            break;
+        default:
+            exit(0);
+    }
+
+    if ( (fd = open("/dev/null", O_RDWR, 0)) < 0) {
+        (void) fprintf(stderr, "could not daemonize: %s\n", strerror(errno));
+        exit(11);
+    }
+
+    if ( dup2(fd, STDIN_FILENO) == -1 ||
+         dup2(fd, STDOUT_FILENO) == -1 ||
+         dup2(fd, STDERR_FILENO) == -1 ) {
+        (void) fprintf(stderr, "could not daemonize: %s\n", strerror(errno));
+        exit(11);
+    }
+
+    /* (void) chdir("/"); */
+
+#define MAXFD   1024
+    if ( (maxfd = getdtablesize()) < 0)
+        maxfd = MAXFD;
+
+    for ( fd=STDERR_FILENO+1; fd<maxfd; fd++ ) {
+        if (fd != lfd)
+            (void) close(fd);
+    }
+}
 
 /*
  * print usage information and exit
@@ -287,7 +355,7 @@ usage(progname)
 	char	*progname;
 {
 	(void) fprintf(stderr,
-		"usage: %s [-l startline | -r startregex] [-c configfile] [-d dumpfile] [-p pidfile] [-f] [-t] [-e] [logfile]\n",
+		"usage: %s [-l startline | -r startregex] [-c configfile] [-d dumpfile] [-p pidfile] [-D] [-f] [-F] [-t] [-e] [logfile]\n",
 		progname);
 	(void) fprintf(stderr, "This is Logsurfer version %s\n", VERSION );
 	exit(1);
@@ -312,6 +380,8 @@ main(argc, argv)
 	int             start_at_end=0;         /* start at end of file     */
 	struct re_pattern_buffer *start_regex=NULL; /* regex for startline  */
 	int		do_follow=0;		/* follow the file?	*/
+	int		daemonize=0;		/* run in the background */
+    int     write_pidfile=0;    /* flag to write PID to file */
 	FILE		*pidfile;		/* write pid info to file */
 
 	char		*logline_buffer;	/* buffer for reading	*/
@@ -338,6 +408,8 @@ main(argc, argv)
 	next_context_timeout=LONG_MAX;
 	logline_num=0;
 	logline=NULL;
+    (void) memset(&ostb, 0, sizeof(struct stat));
+    (void) memset(&nstb, 0, sizeof(struct stat));
 
 #ifdef SENDMAIL_FLUSH
 	flush_time=LONG_MAX;
@@ -391,7 +463,7 @@ main(argc, argv)
 		exit(99);
 	}
 
-	while ( (opt = getopt(argc, argv, "efc:d:l:p:r:st")) != EOF )
+	while ( (opt = getopt(argc, argv, "efFc:d:Dl:p:r:st")) != EOF )
 		switch(opt) {
                 case 'e':
 		        /* start processing at the end of the log file */
@@ -401,6 +473,10 @@ main(argc, argv)
 			/* set follow mode on */
 			do_follow=1;
 			break;
+        case 'F':
+            /* set follow obsessively mode on (follow rotated files) */
+            do_follow=2;
+            break;
 		case 'c':
 			/* specify another config file */
 			(void) strcpy(cf_filename, optarg);
@@ -409,23 +485,25 @@ main(argc, argv)
 			/* specify another dump file */
 			(void) strcpy(dumpfile_name, optarg);
 			break;
+		case 'D':
+			/* daemonize: close fd's and run in the background */
+            daemonize=1;
+			break;
 		case 'l':
 			/* start processing beginning with given line number */
 			if ( start_regex != NULL ) {
 				(void) fprintf(stderr, "-l and -r can't be used together\n");
 				usage(progname);
 			}
+            if ( start_at_end != 0 ) {
+                (void) fprintf(stderr, "-e and -l can't be used together\n");
+                usage(progname);
+            }
 			start_line=atol(optarg);
 			break;
 		case 'p':
-			/* write pid to a file */
-			if ( (pidfile=fopen(optarg, "w")) == NULL ) {
-				(void) fprintf(stderr, "unable to open pidfile %s\n",
-					optarg);
-				exit(9);
-			}
-			(void) fprintf(pidfile, "%ld\n", (long) getpid());
-			(void) fclose(pidfile);
+            write_pidfile=1;
+            (void) strcpy(pidfile_name, optarg);
 			break;
 		case 'r':
 			/* start processing at first line that matches regex */
@@ -433,6 +511,10 @@ main(argc, argv)
 				(void) fprintf(stderr, "-l and -r can't be used together\n");
 				usage(progname);
 			}
+            if ( start_at_end != 0 ) {
+                (void) fprintf(stderr, "-e and -r can't be used together\n");
+                usage(progname);
+            }
 			if ( (start_regex=(struct re_pattern_buffer *)
 				malloc(sizeof(struct re_pattern_buffer))) == NULL ) {
 				(void) fprintf(stderr, "out of memory for start regex %s",
@@ -472,8 +554,13 @@ main(argc, argv)
 		exit(2);
 	}
 
-	if ( argc == 0 || !strcmp(argv[0], "-") )
+	if ( argc == 0 || !strcmp(argv[0], "-") ) {
+        if (daemonize) {
+			(void) fprintf(stderr, "cannot use stdin when running as a daemon\n");
+			exit(6);
+        }
 		logfile=stdin;
+    }
 	else {
 		if ( (logfile=fopen(strcpy(logfile_name, argv[0]), "r")) == NULL ) {
 			(void) fprintf(stderr, "error opening logfile %s\n",
@@ -483,7 +570,26 @@ main(argc, argv)
 		if (start_at_end) {
 		  fseek(logfile,0,SEEK_END);
 		}
+        if ( do_follow == 2 ) {
+            if ( fstat(fileno(logfile), &ostb) == -1 ) {
+                (void) fprintf(stderr, "cannot stat logfile\n");
+                exit(6);
+            }
+        }
 	}
+
+    if ( daemonize )
+        runasdaemon(fileno(logfile));
+
+    if( write_pidfile ){
+        /* write pid to a file */
+        if ( (pidfile=fopen(pidfile_name, "w")) == NULL ) {
+            (void) fprintf(stderr, "unable to open pidfile %s\n", pidfile_name);
+            exit(9);
+        }
+        (void) fprintf(pidfile, "%ld\n", (long) getpid());
+        (void) fclose(pidfile);
+    }
 
 	if ( start_line != 0 ) {
 		logline_num=start_line-1;
@@ -553,8 +659,19 @@ main(argc, argv)
 			process_logline();
 			(void) free(logline);
 		}
-		else if ( do_follow )
+		else if ( do_follow ) {
 			(void) sleep(1);
+            if ( do_follow == 2 && fileno(logfile) != STDIN_FILENO
+                && stat(logfile_name, &nstb) != -1 ) {
+                    if ( nstb.st_ino != ostb.st_ino || 
+                         nstb.st_dev != ostb.st_dev ||
+                         nstb.st_rdev != ostb.st_rdev ||
+                         nstb.st_nlink == 0 ) {
+                        logfile_reopen(SIGHUP);
+                        (void) memcpy(&ostb, &nstb, sizeof(struct stat));
+                    }
+            }
+        }
 		else {
 			(void) fclose(logfile);
 			logfile=NULL;

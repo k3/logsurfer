@@ -315,30 +315,34 @@ do_echo(echo_tokens)
 		return;
 	}
 	if( echostring[0] == '>' ){
-	  /* we've got a filename : grab it, open it, and hop to the next string */
-	  outfile_name = echostring+1;
-	  if( outfile_name[0] == '>' ){
-	    outfile_name++;
-	    write_mode = "a"; /* append */
-	  } else {
-	    write_mode = "w";
-	  }
-	  if (echo_tokens->next == NULL || (echostring=(echo_tokens->next)->this_word) == NULL ) {
-	    (void) fprintf(stderr, "echo definition without argument\n");
-	    return;
-	  }
-	  outfile = fopen( outfile_name, write_mode );
-	  if( outfile == NULL ){
-	    (void) fprintf(stderr, "failed to open echo output file %s\n", outfile_name );
-	    return;
-	  }
-	  fprintf(outfile,"%s\n",echostring);
-	  fclose(outfile);
+        /* we've got a filename : grab it, open it, and hop to the next string */
+        outfile_name = echostring+1;
+        if( outfile_name[0] == '>' ){
+            outfile_name++;
+            write_mode = "a"; /* append */
+        } else {
+            write_mode = "w";
+        }
+        if (echo_tokens->next == NULL || (echostring=(echo_tokens->next)->this_word) == NULL ) {
+            (void) fprintf(stderr, "echo definition without argument\n");
+            return;
+        }
+        echo_tokens = echo_tokens->next;
+        outfile = fopen( outfile_name, write_mode );
+        if( outfile == NULL ){
+            (void) fprintf(stderr, "failed to open echo output file %s\n", outfile_name );
+            return;
+        }
 	} else {
-	  /* normal stdout output */
-	  fprintf(stdout,"%s\n",echostring);
-	  fflush(stdout);
+        /* normal stdout output */
+        outfile = stdout;
 	}
+
+    fprintf(outfile,"%s\n",echostring);
+    if( outfile == stdout )
+        fflush(stdout);
+    else
+        fclose(outfile);
 
 	return;
 }
