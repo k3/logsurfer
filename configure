@@ -715,7 +715,7 @@ echo "$ac_t""$INSTALL" 1>&6
 # It thinks the first close brace ends the variable substitution.
 test -z "$INSTALL_PROGRAM" && INSTALL_PROGRAM='${INSTALL}'
 
-test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
+test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -D -m 644'
 
 echo $ac_n "checking whether ${MAKE-make} sets \${MAKE}""... $ac_c" 1>&6
 set dummy ${MAKE-make}; ac_make=$2
