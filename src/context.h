@@ -22,6 +22,7 @@ void		add_to_context(struct context *, struct context_line *);
 void		do_context_action(struct context *);
 
 void		check_context_timeout();
+void		check_context_linelimit();
 
 void		expand_context_action_macros(struct context *);
 
