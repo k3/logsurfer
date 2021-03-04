@@ -666,6 +666,7 @@ main(argc, argv)
                     if ( nstb.st_ino != ostb.st_ino || 
                          nstb.st_dev != ostb.st_dev ||
                          nstb.st_rdev != ostb.st_rdev ||
+                         nstb.st_size < ostb.st_size ||
                          nstb.st_nlink == 0 ) {
                         logfile_reopen(SIGHUP);
                         (void) memcpy(&ostb, &nstb, sizeof(struct stat));
